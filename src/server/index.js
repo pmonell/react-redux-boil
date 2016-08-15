@@ -18,17 +18,16 @@ app.use((req, res) => {
   const history = syncHistoryWithStore(memoryHistory, store)
 
   match({ routes: routes, location: req.url }, (err, redirectLocation, renderProps) => {
-    console.log(req.url)
     if (err) {
       console.error(err)
       // internal error
       res.status('500').send('Internal Server Error Occured')
     }
-    console.log(redirectLocation)
     if (!renderProps) {
       // page not found error
       res.status('404').send('Page Not Found')
     }
+    
     const initialComponent = (
       <Provider store={store}>
         <RouterContext {...renderProps}/>
@@ -37,14 +36,8 @@ app.use((req, res) => {
 
     const initialState = store.getState()
     const initialHtml = initHTML(initialState, renderToString(initialComponent))
-    console.log(initialState)
-    console.log(renderToString(initialComponent))
     res.send(initialHtml)
   })
 })
 
-const PORT = process.env.PORT || 3000
-
-app.listen(PORT, function() {
-  console.log("Listening %d", PORT)
-})
+export { app }
