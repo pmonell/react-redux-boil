@@ -12,32 +12,45 @@ const app = express()
 
 app.use(express.static('dist'))
 
-app.use((req, res) => {
+app.use((request, response) => {
+  if (request.url == '/favicon.ico') {
+    response.status('404')
+  }
+
   const memoryHistory = createMemoryHistory()
   const store = createStore(memoryHistory)
   const history = syncHistoryWithStore(memoryHistory, store)
 
-  match({ routes: routes, location: req.url }, (err, redirectLocation, renderProps) => {
-    if (err) {
-      console.error(err)
-      // internal error
-      res.status('500').send('Internal Server Error Occured')
-    }
-    if (!renderProps) {
-      // page not found error
-      res.status('404').send('Page Not Found')
-    }
-    
-    const initialComponent = (
-      <Provider store={store}>
-        <RouterContext {...renderProps}/>
-      </Provider>
-    )
+  function matchLocation(location) {
+    match({ routes, location }, (err, redirectLocation, renderProps) => {
+      if (redirectLocation) {
+        return matchLocation(redirectLocation)
+      }
+      if (err) {
+        // internal error
+        response.status('500').send('Internal Server Error Occured')
+        return
+      }
+      if (!renderProps) {
+        // page not found error
+        response.status('404').send('Page Not Found')
+        return
+      }
 
-    const initialState = store.getState()
-    const initialHtml = initHTML(initialState, renderToString(initialComponent))
-    res.send(initialHtml)
-  })
+      // create component
+      const initialComponent = (
+        <Provider store={store}>
+          <RouterContext {...renderProps}/>
+        </Provider>
+      )
+
+      const initialState = store.getState()
+      const HTML = initHTML(initialState, renderToString(initialComponent))
+      response.send(HTML)
+    })
+  }
+
+  matchLocation(request.url)
 })
 
 export { app }
