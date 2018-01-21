@@ -1,7 +1,13 @@
 {
   "name": "universal_boiler",
-  "version": "0.1",
+  "version": "0.1.1",
   "description": "ideal isomorphic react redux",
+	"scripts": {
+    "start": "node --harmony server.babel.js",
+    "build": "webpack --config webpack.client.config.js",
+    "dev": "webpack --verbose --colors --display-error-details --config webpack.client-watch.js && webpack-dev-server --config webpack.client-watch.js",
+    "buildstart": "npm run build && npm run start"
+  },
   "devDependencies": {
     "babel-loader": "^6.2.4",
     "babel-polyfill": "^6.13.0",
